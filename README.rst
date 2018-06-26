@@ -8,6 +8,10 @@ django admin to filter in admin list views by foreign key relations.
 Usage
 -----
 
+#. Install the package, for example from PyPi::
+
+    pip install django-autocompletefilter
+
 #. Add ``autocompletefilter`` to your ``INSTALLED_APPS`` setting.
 
 #. Create and register a model admin for the model you want to filter by.
