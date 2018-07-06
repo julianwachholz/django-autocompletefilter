@@ -22,6 +22,7 @@ setup(
     ),
     license='MIT',
     description='Django 2.0 ModelAdmin list_filter with autocomplete widget.',
+    keywords='django django-admin autocomplete auto-complete filter select2',
     long_description=README,
     url='https://github.com/julianwachholz/django-autocompletefilter',
     author='Julian Wachholz',
