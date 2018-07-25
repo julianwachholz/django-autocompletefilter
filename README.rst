@@ -4,6 +4,7 @@ django-autocompletefilter
 A django application that lets you use the built in autocomplete function of the
 django admin to filter in admin list views by foreign key relations.
 
+.. image:: https://pbs.twimg.com/media/DgmzYLbW4AA9oL3.jpg:large
 
 Usage
 -----
