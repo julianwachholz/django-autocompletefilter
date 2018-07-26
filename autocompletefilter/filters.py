@@ -1,5 +1,19 @@
 from django.contrib.admin.filters import RelatedFieldListFilter
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
+
+
+def get_request():
+    """Walk the stack up to find a request in a context variable."""
+    import inspect
+    frame = None
+    try:
+        for f in inspect.stack()[1:]:
+            frame = f[0]
+            code = frame.f_code
+            if code.co_varnames and 'context' in code.co_varnames:
+                return frame.f_locals['context']['request']
+    finally:
+        del frame
 
 
 class AutocompleteListFilter(RelatedFieldListFilter):
@@ -11,13 +25,26 @@ class AutocompleteListFilter(RelatedFieldListFilter):
         """Always show the autocomplete filter."""
         return True
 
+    @staticmethod
+    def get_admin_namespace():
+        request = get_request()
+        return request.resolver_match.namespace
+
     def get_url(self):
         model = self.field.related_model
-        return reverse('admin:%s_%s_autocomplete' % (
-            # self.admin_site.name,  # TODO get access to admin_site?
+        args = (
             model._meta.app_label,
-            model._meta.model_name
-        ))
+            model._meta.model_name,
+        )
+        try:
+            return reverse('admin:%s_%s_autocomplete' % args)
+        except NoReverseMatch:
+            # Admin is registered under a different namespace!
+            args = (
+                self.get_admin_namespace(),
+                *args,
+            )
+            return reverse('%s:%s_%s_autocomplete' % args)
 
     def field_choices(self, field, request, model_admin):
         # Do not populate the field choices with a huge queryset
