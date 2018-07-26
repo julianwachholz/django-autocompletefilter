@@ -1,5 +1,5 @@
 from django.contrib.admin.filters import RelatedFieldListFilter
-from django.urls import reverse, NoReverseMatch
+from django.urls import NoReverseMatch, reverse
 
 
 def get_request():
@@ -22,7 +22,7 @@ class AutocompleteListFilter(RelatedFieldListFilter):
     template = 'admin/filter_autocomplete.html'
 
     def has_output(self):
-        """Always show the autocomplete filter."""
+        """Show the autocomplete filter at all times."""
         return True
 
     @staticmethod
