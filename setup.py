@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     python_requires='>=3.4',
     install_requires=(
-        'django>=2.0,<3.0',
+        'django>=2.0',
     ),
     license='MIT',
     description='Django 2.0 ModelAdmin list_filter with autocomplete widget.',
