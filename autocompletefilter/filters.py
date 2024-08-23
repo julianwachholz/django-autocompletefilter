@@ -73,7 +73,10 @@ class AutocompleteListFilter(RelatedFieldListFilter):
 
         lookup_display = None
         if self.lookup_val:
-            instance = self.field.related_model.objects.get(pk=self.lookup_val)
+            if django.VERSION >= (5, 0):
+                instance = self.field.related_model.objects.get(pk=self.lookup_val[-1])
+            else:
+                instance = self.field.related_model.objects.get(pk=self.lookup_val)
             lookup_display = str(instance)
 
         model = self.field.model
