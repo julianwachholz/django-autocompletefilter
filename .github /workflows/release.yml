@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  build:
+    if: github.repository == 'julianwachholz/django-autocompletefilter'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U build setuptools twine wheel
+
+      - name: Build package
+        run: |
+          python -m build
+          twine check dist/*
+
+      - name: Upload packages
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@v1.9.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
