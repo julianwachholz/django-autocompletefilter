@@ -1,5 +1,11 @@
 *.py[co]
 *.egg-info
 
+.idea/
+.tox/
+.venv/
 build/
 dist/
+venv/
+
+.python-version
