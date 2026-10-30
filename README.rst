@@ -39,7 +39,7 @@ Caution is advised when using it.
 
 Using multiple autocomplete filters on the same page does work.
 
-Currently only tested on Python 3.6
+Tested with Django 4.2 to 6.1.
 
 
 Contributing

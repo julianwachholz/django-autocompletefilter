@@ -1,6 +1,5 @@
-import django
+from django import forms
 from django.contrib.admin.widgets import SELECT2_TRANSLATIONS
-from django.utils.datastructures import OrderedSet
 from django.utils.translation import get_language
 
 
@@ -31,11 +30,4 @@ class AutocompleteFilterMixin:
             "admin/css/vendor/select2/select2.css",
             "admin/css/autocomplete.css",
         ]
-        if django.VERSION >= (2, 2, 0, "final", 0):
-            media._js_lists.append(extra_js)
-            media._css_lists.append({"screen": extra_css})
-        else:
-            media._js = OrderedSet(extra_js + media._js)
-            media._css.setdefault("screen", [])
-            media._css["screen"].extend(extra_css)
-        return media
+        return media + forms.Media(js=extra_js, css={"screen": extra_css})
