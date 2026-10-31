@@ -33,18 +33,6 @@ class AutocompleteListFilter(RelatedFieldListFilter):
         return request.resolver_match.namespace
 
     def get_url(self):
-        if django.VERSION > (3, 2):
-            return self.get_generic_url()
-
-        remote_model = self.field.related_model
-        args = (
-            self.get_admin_namespace(),
-            remote_model._meta.app_label,
-            remote_model._meta.model_name,
-        )
-        return reverse("%s:%s_%s_autocomplete" % args)
-
-    def get_generic_url(self):
         try:
             return reverse("admin:autocomplete")
         except NoReverseMatch:
@@ -90,7 +78,7 @@ class AutocompleteListFilter(RelatedFieldListFilter):
             "query_string_all": changelist.get_query_string(
                 {}, [self.lookup_kwarg, self.lookup_kwarg_isnull]
             ),
-            # Data attrs required for Django 3.2+
+            # Data attrs for the generic autocomplete view
             "app_label": model._meta.app_label,
             "model_name": model._meta.model_name,
             "field_name": self.field.name,
