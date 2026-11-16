@@ -2,7 +2,7 @@ django-autocompletefilter
 =========================
 
 A django application that lets you use the built in autocomplete function of the
-django admin to filter in admin list views by foreign key relations.
+django admin to filter in admin list views by foreign key relations, or by any value you can search.
 
 .. image:: https://pbs.twimg.com/media/DgmzYLbW4AA9oL3.jpg:large
 
@@ -30,6 +30,46 @@ Usage
             ('bar', AutocompleteListFilter),
         )
 
+
+Filtering by any value
+----------------------
+
+For a value that isn't a foreign key (a text field, a JSON list, a computed lookup), or a
+foreign key you'd rather search your own way, subclass AutocompleteFilter: a
+SimpleListFilter whose choices are searched as you type instead of listed. Implement
+search(request, term), returning (value, label) pairs (a list, or a queryset of
+pairs, served in pages of page_size), and queryset() as usual. label(request,
+value) names the chosen value (default: the value itself). self.model_admin is there
+for search()::
+
+    from autocompletefilter.admin import AutocompleteFilterMixin
+    from autocompletefilter.filters import AutocompleteFilter
+
+    class CountryFilter(AutocompleteFilter):
+        title = "country"
+        parameter_name = "country"
+
+        def search(self, request, term):
+            countries = (
+                self.model_admin.get_queryset(request)
+                .filter(country__icontains=term)
+                .order_by("country")
+                .values_list("country", flat=True)
+                .distinct()
+            )
+            return [(country, country) for country in countries]
+
+        def queryset(self, request, queryset):
+            if self.value():
+                return queryset.filter(country=self.value())
+            return queryset
+
+    class VisitAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
+        list_filter = (CountryFilter,)
+
+AutocompleteFilterMixin serves the searches at <changelist>/autocomplete-filter/<parameter_name>/
+(URL name <app_label>_<model_name>_autocomplete_filter), for staff who may view the model,
+and only for the filters in the admin's list_filter.
 
 Status of this project
 ----------------------

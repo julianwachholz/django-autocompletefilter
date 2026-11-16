@@ -1,5 +1,5 @@
 import django
-from django.contrib.admin.filters import RelatedFieldListFilter
+from django.contrib.admin.filters import RelatedFieldListFilter, SimpleListFilter
 from django.urls import NoReverseMatch, reverse
 
 
@@ -82,4 +82,65 @@ class AutocompleteListFilter(RelatedFieldListFilter):
             "app_label": model._meta.app_label,
             "model_name": model._meta.model_name,
             "field_name": self.field.name,
+        }
+
+
+class AutocompleteFilter(SimpleListFilter):
+    """
+    A list filter for any value, not just a foreign key, with the same autocomplete widget.
+
+    Instead of ``lookups()``, which lists every choice up front, a subclass implements
+    ``search(request, term)``: the ``(value, label)`` pairs that match what was typed, as a
+    list or a queryset of pairs (sliced into pages of ``page_size``). ``queryset()`` filters
+    by ``self.value()`` as usual, and ``label(request, value)`` names the chosen value.
+    The model admin needs ``AutocompleteFilterMixin``, which serves the searches.
+    """
+
+    template = "admin/filter_autocomplete.html"
+    page_size = 20
+
+    def __init__(self, request, params, model, model_admin):
+        self.request = request  # for label()
+        self.model_admin = model_admin  # for search(): model_admin.get_queryset(request) …
+        super().__init__(request, params, model, model_admin)
+
+    def lookups(self, request, model_admin):
+        return []  # never every choice: search() finds them
+
+    def has_output(self):
+        return True
+
+    def search(self, request, term):
+        raise NotImplementedError(
+            "subclasses of AutocompleteFilter must provide a search() method"
+        )
+
+    def label(self, request, value):
+        return value
+
+    def choices(self, changelist):
+        opts = changelist.model._meta
+        url = reverse(
+            "%s:%s_%s_autocomplete_filter"
+            % (changelist.model_admin.admin_site.name, opts.app_label, opts.model_name),
+            args=[self.parameter_name],
+        )
+        placeholder = "PKVAL"
+        value = self.value()
+        yield {
+            "url": url,
+            "selected": value,
+            "selected_display": self.label(self.request, value)
+            if value
+            else None,
+            "query_string": changelist.get_query_string(
+                {self.parameter_name: placeholder}
+            ),
+            "query_string_placeholder": placeholder,
+            "query_string_all": changelist.get_query_string(
+                remove=[self.parameter_name]
+            ),
+            "app_label": opts.app_label,
+            "model_name": opts.model_name,
+            "field_name": self.parameter_name,
         }
