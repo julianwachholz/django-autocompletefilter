@@ -59,19 +59,25 @@ class AutocompleteListFilter(RelatedFieldListFilter):
             {self.lookup_kwarg: placeholder}, [self.lookup_kwarg_isnull]
         )
 
-        lookup_display = None
+        selected = lookup_display = None
         if self.lookup_val:
+            # Django 5.0 and later keep every value of the parameter, in a list
             if django.VERSION >= (5, 0):
-                instance = self.field.related_model.objects.get(pk=self.lookup_val[-1])
+                selected = self.lookup_val[-1]
             else:
-                instance = self.field.related_model.objects.get(pk=self.lookup_val)
-            lookup_display = str(instance)
+                selected = self.lookup_val
+            # an object deleted since the link was made selects nothing
+            instance = self.field.related_model.objects.filter(pk=selected).first()
+            if instance is None:
+                selected = None
+            else:
+                lookup_display = str(instance)
 
         model = self.field.model
 
         yield {
             "url": url,
-            "selected": self.lookup_val,
+            "selected": selected,
             "selected_display": lookup_display,
             "query_string": query_string,
             "query_string_placeholder": placeholder,

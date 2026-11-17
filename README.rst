@@ -87,6 +87,11 @@ Contributing
 
 All suggestions are welcome. Especially about ways to make this cleaner.
 
+To run the tests::
+
+    pip install -e ".[test]"
+    pytest
+
 
 Common issues
 -------------
